@@ -11,8 +11,15 @@
       <meetings-page :username="authenticatedUsername"></meetings-page>
     </div>
     <div v-else>
-      <login-form @login="login($event)"></login-form>
+      <login-form @login="submit($event)" :button-label=this.buttonLabel></login-form>
     </div>
+    <div v-if="registerMode"> 
+      <a @click=registerModeOff()>Logowanie</a>
+    </div>
+    <div v-else>
+      <p>Nie masz konta? <a @click=registerModeOn()>Rejestracja</a></p>
+    </div>
+    
   </div>
 </template>
 
@@ -25,16 +32,48 @@
         components: {LoginForm, MeetingsPage},
         data() {
             return {
-                authenticatedUsername: ""
+                authenticatedUsername: "",
+                registerMode: false,
+                buttonLabel: "Zaloguj"
             };
         },
         methods: {
-            login(user) {
-                this.authenticatedUsername = user.login;
+            submit(user) {
+                if (this.registerMode) {
+                  this.register(user);
+                } else {
+                    this.login(user);
+                }
+                
             },
             logout() {
                 this.authenticatedUsername = '';
-            }
+            },
+            registerModeOn() {
+              this.registerMode = true;
+              this.buttonLabel = "Zarejestruj"
+            },
+
+            registerModeOff() {
+              this.registerMode = false;
+              this.buttonLabel = "Zaloguj"
+            },
+
+            login(user) {
+                this.authenticatedUsername = user;
+            },
+
+            
+            register(user) {
+                this.$http.post('participants', user)
+                    .then(response => {
+                        // udało się
+                        console.log(response)
+                    })
+                    .catch(response => {
+                        // nie udało sie     
+                    });
+}
         }
     };
 </script>
