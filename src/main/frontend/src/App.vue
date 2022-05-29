@@ -10,15 +10,18 @@
       </h2>
       <meetings-page :username="authenticatedUsername"></meetings-page>
     </div>
+
     <div v-else>
+      <div class="error-msg" v-if="errorMessage"> {{ errorMessage }}</div>
       <login-form @login="submit($event)" :button-label=this.buttonLabel></login-form>
+      <div v-if="registerMode">
+        <a @click=registerModeOff()>Logowanie</a>
+      </div>
+      <div v-else>
+        <p>Nie masz konta? <a @click=registerModeOn()>Rejestracja</a></p>
+      </div>
     </div>
-    <div v-if="registerMode"> 
-      <a @click=registerModeOff()>Logowanie</a>
-    </div>
-    <div v-else>
-      <p>Nie masz konta? <a @click=registerModeOn()>Rejestracja</a></p>
-    </div>
+
     
   </div>
 </template>
@@ -34,7 +37,8 @@
             return {
                 authenticatedUsername: "",
                 registerMode: false,
-                buttonLabel: "Zaloguj"
+                buttonLabel: "Zaloguj",
+                errorMessage: ''
             };
         },
         methods: {
@@ -48,6 +52,7 @@
             },
             logout() {
                 this.authenticatedUsername = '';
+                this.errorMessage = '';
             },
             registerModeOn() {
               this.registerMode = true;
@@ -67,11 +72,13 @@
             register(user) {
                 this.$http.post('participants', user)
                     .then(response => {
-                        // udało się
-                        console.log(response)
+                        console.log(user);
+                        console.log(user.login);
+                        this.authenticatedUsername = user.login;
                     })
                     .catch(response => {
-                        // nie udało sie     
+                      console.log(response);
+                        this.errorMessage = response.bodyText;
                     });
 }
         }
@@ -87,5 +94,10 @@
   .logo {
     vertical-align: middle;
   }
+
+  .error-msg {
+    color: red;
+  }
+
 </style>
 
